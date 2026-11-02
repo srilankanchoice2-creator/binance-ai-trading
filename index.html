@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Trading Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;
+ background:#101722;color:#fff;
+ font-family:Arial,sans-serif
+}
+h1{color:#39d5a0}
+.card{
+ background:#1b2735;padding:18px;
+ margin:16px 0;border-radius:12px
+}
+button{
+ background:#20b989;color:white;
+ border:0;padding:14px;
+ border-radius:8px;width:100%;
+ font-size:16px
+}
+.small{color:#aab6c5;font-size:13px}
+</style>
+</head>
+<body>
+
+<h1>AI Trading Dashboard</h1>
+<p class="small">BINANCE FUTURES ANALYSIS SYSTEM</p>
+
+<div class="card">
+<h3>Account Settings</h3>
+<p>Capital: 20 USDT</p>
+<p>Risk per Trade: 0.05 USDT</p>
+<p>Maximum Leverage: 3x</p>
+</div>
+
+<div class="card">
+<h3>Market Scanner</h3>
+<p id="status">System is ready</p>
+<button onclick="analyze()">START ANALYSIS</button>
+</div>
+
+<div class="card">
+<h3>AI Trading Signal</h3>
+<h2 id="signal">NO SIGNAL</h2>
+<p id="details">Waiting for market data connection.</p>
+</div>
+
+<div class="card">
+<h3>AI Agents</h3>
+<p>1. Market Scanner</p>
+<p>2. Technical Analyst</p>
+<p>3. Trend Analyst</p>
+<p>4. News Analyst</p>
+<p>5. Risk Manager</p>
+<p>6. Trade Validator</p>
+</div>
+
+<script>
+function analyze(){
+ document.getElementById("status").innerText=
+ "Dashboard is working. Waiting for Binance connection.";
+ document.getElementById("signal").innerText=
+ "WAITING FOR DATA";
+ document.getElementById("details").innerText=
+ "Live analysis is not connected yet.";
+}
+</script>
+
+</body>
+</html>
