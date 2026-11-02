@@ -5,150 +5,102 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<title>AI Futures Trading System</title>
-
+<title>Binance All-Market Futures Scanner</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;padding:14px;background:#0b1220;color:#e5e7eb;
- font-family:Arial,sans-serif;font-size:14px
-}
+body{margin:0;padding:14px;background:#0b1220;color:#e5e7eb;font-family:Arial,sans-serif;font-size:14px}
 h1{color:#38bdf8;font-size:23px}
-h2{font-size:18px;color:#e2e8f0}
+h2{font-size:18px}
 h3{font-size:16px;color:#38bdf8}
-.card{
- background:#172235;border:1px solid #293950;
- border-radius:12px;padding:14px;margin:13px 0;
- overflow-x:auto
-}
-.grid{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px
-}
-.stat{
- background:#0f1a2b;padding:11px;border-radius:9px
-}
+.card{background:#172235;border:1px solid #293950;border-radius:12px;padding:14px;margin:13px 0;overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{background:#0f1a2b;padding:11px;border-radius:9px}
 .stat b{display:block;font-size:17px;margin-top:5px}
-.small{font-size:12px;color:#94a3b8;line-height:1.5}
-.good{color:#22c55e}
-.bad{color:#ef4444}
-.wait{color:#facc15}
-.blue{color:#38bdf8}
+.small{font-size:12px;color:#94a3b8;line-height:1.6}
+.good{color:#22c55e}.bad{color:#ef4444}.wait{color:#facc15}.blue{color:#38bdf8}
 table{width:100%;border-collapse:collapse;min-width:520px}
-th,td{
- padding:10px 7px;border-bottom:1px solid #334155;
- text-align:left;font-size:12px;white-space:nowrap
-}
+th,td{padding:10px 7px;border-bottom:1px solid #334155;text-align:left;font-size:12px;white-space:nowrap}
 th{color:#94a3b8}
-button{
- background:#0284c7;color:white;border:0;border-radius:8px;
- padding:12px 18px;font-weight:bold;font-size:14px
-}
+button{background:#0284c7;color:white;border:0;border-radius:8px;padding:12px 18px;font-weight:bold;font-size:14px}
 button:disabled{opacity:.5}
-.result{
- background:#0f1a2b;border-radius:9px;padding:12px;margin:10px 0;
- border-left:3px solid #38bdf8
-}
-.long{border-left-color:#22c55e}
-.short{border-left-color:#ef4444}
-.warning{
- background:#382b12;color:#facc15;padding:11px;
- border-radius:8px;line-height:1.5
-}
+.result{background:#0f1a2b;border-radius:9px;padding:12px;margin:10px 0;border-left:3px solid #38bdf8}
+.long{border-left-color:#22c55e}.short{border-left-color:#ef4444}
+.warning{background:#382b12;color:#facc15;padding:11px;border-radius:8px;line-height:1.6}
+.track{height:10px;background:#334155;border-radius:10px;overflow:hidden;margin:10px 0}
+#progressBar{height:100%;width:0%;background:#0ea5e9;transition:width .2s}
 </style>
 </head>
-
 <body>
 
 <h1>AI Futures Trading System</h1>
-<p class="small">Binance USDⓈ-M Perpetual Market Analysis Dashboard</p>
+<p class="small">Binance USDⓈ-M Perpetual | All Eligible USDT Markets</p>
 
 <div class="card">
 <h3>Account & Risk Settings</h3>
 <div class="grid">
- <div class="stat">Capital<b>20 USDT</b></div>
- <div class="stat">Risk per Trade<b>0.05 USDT</b></div>
- <div class="stat">Maximum Leverage<b>3x</b></div>
- <div class="stat">Analysis Timeframes<b>5m / 15m / 1h</b></div>
+<div class="stat">Capital<b>20 USDT</b></div>
+<div class="stat">Risk per Trade<b>0.05 USDT</b></div>
+<div class="stat">Maximum Leverage<b>3x</b></div>
+<div class="stat">Timeframes<b>5m / 15m / 1h</b></div>
 </div>
-<p class="small">These are analysis settings. No exchange orders are placed.</p>
+<p class="small">Analysis only. No API key and no automatic orders.</p>
 </div>
 
 <div class="card">
 <h3>Binance Connection</h3>
 <p id="connection" class="wait">Connecting...</p>
-<p id="scanStatus" class="small">Preparing market scanner...</p>
-<button id="scanButton" onclick="scanMarket()">SCAN MARKET NOW</button>
+<p id="scanStatus" class="small">Preparing full-market scan...</p>
+<div class="track"><div id="progressBar"></div></div>
+<div class="grid">
+<div class="stat">Eligible contracts<b id="totalCoins">-</b></div>
+<div class="stat">Analyzed<b id="analyzed">0</b></div>
+<div class="stat">Failed requests<b id="failed">0</b></div>
+<div class="stat">Progress<b id="progressText">0%</b></div>
+</div>
+<br>
+<button id="scanButton" onclick="scanMarket()">SCAN ALL MARKETS NOW</button>
+<p class="small">The scanner processes every eligible contract in controlled batches to reduce API pressure.</p>
 </div>
 
 <div class="card">
-<h3>Top 10 Market Coins by Volume</h3>
+<h3>Top 10 Coins by 24h Volume</h3>
 <table>
-<thead>
-<tr><th>Coin</th><th>Price</th><th>24h Change</th><th>Volume USDT</th></tr>
-</thead>
-<tbody id="prices">
-<tr><td colspan="4">Loading...</td></tr>
-</tbody>
+<thead><tr><th>Coin</th><th>Price</th><th>24h Change</th><th>Volume USDT</th></tr></thead>
+<tbody id="prices"><tr><td colspan="4">Loading...</td></tr></tbody>
 </table>
 </div>
 
 <div class="card">
 <h3>Confirmed Trade Setups</h3>
-<p class="small">
-All analyzed coins that meet the strict LONG or SHORT confirmation rules.
-</p>
+<p class="small">All successfully analyzed contracts that meet the strict confirmation rules.</p>
 <table>
-<thead>
-<tr>
-<th>Coin</th><th>Direction</th><th>5m</th>
-<th>15m</th><th>1h</th><th>Score</th>
-</tr>
-</thead>
-<tbody id="confirmed">
-<tr><td colspan="6">Waiting for analysis...</td></tr>
-</tbody>
+<thead><tr><th>Coin</th><th>Direction</th><th>5m</th><th>15m</th><th>1h</th><th>Score</th></tr></thead>
+<tbody id="confirmed"><tr><td colspan="6">Waiting...</td></tr></tbody>
 </table>
 <div id="confirmedDetails"></div>
 </div>
 
 <div class="card">
 <h3>Backup — Next Best 5 Candidates</h3>
-<p class="small">
-Shown when there are no confirmed setups. These are potential LONG or SHORT
-candidates, ranked by estimated price-risk distance and indicator agreement.
-They are not confirmed trading signals.
-</p>
+<p class="small">Only shown when no confirmed setup exists. Each candidate must have at least two timeframes pointing in the same direction. These are NOT confirmed signals.</p>
 <table>
-<thead>
-<tr>
-<th>Rank</th><th>Coin</th><th>Direction</th>
-<th>Score</th><th>5m</th><th>15m</th><th>1h</th>
-</tr>
-</thead>
-<tbody id="backup">
-<tr><td colspan="7">Waiting for analysis...</td></tr>
-</tbody>
+<thead><tr><th>Rank</th><th>Coin</th><th>Direction</th><th>Score</th><th>5m</th><th>15m</th><th>1h</th></tr></thead>
+<tbody id="backup"><tr><td colspan="7">Waiting...</td></tr></tbody>
 </table>
 <div id="backupDetails"></div>
 </div>
 
 <div class="card">
-<h3>Risk & Trading Information</h3>
-<div id="riskInfo" class="small">
-Risk calculations will appear here.
-</div>
+<h3>Risk & Scan Information</h3>
+<div id="riskInfo" class="small">Waiting for scan...</div>
 </div>
 
 <div class="warning">
-<strong>Important:</strong> This dashboard provides indicator-based analysis,
-not guaranteed profitable signals. Backup candidates are not confirmed trades.
-Never place an order based only on a backup result. Fees, slippage, minimum
-order value and exchange filters must be checked before trading.
+<b>Important risk notice:</b><br>
+This is a rule-based indicator scanner, not a genuine AI prediction system. No signal guarantees profit. Entry, Stop Loss, Take Profit and quantity are estimates. Trading fees, slippage, funding, exchange minimum order size and contract filters can make a calculated position unsuitable. Never trade a backup candidate as if it were confirmed.
 </div>
 
-<p class="small">
-Analysis only. No API keys required. No automatic trading. No orders are placed.
-</p>
+<p class="small">No automatic trading. No orders placed. No API keys required.</p>
 
 <script>
 "use strict";
@@ -159,20 +111,53 @@ const SETTINGS={
  capital:20,
  risk:0.05,
  leverage:3,
- scanCount:50,
- refreshMs:300000,
- concurrency:3
+ concurrency:4,
+ refreshMs:300000
 };
 
 let busy=false;
+let nextTimer=null;
 
 const $=id=>document.getElementById(id);
 
 function fmt(n){
  if(!Number.isFinite(n))return "N/A";
- return Number(n).toLocaleString("en-US",{
-  maximumFractionDigits:6
- });
+ return Number(n).toLocaleString("en-US",{maximumFractionDigits:8});
+}
+
+function sleep(ms){
+ return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function fetchJSON(url,attempt=0){
+ try{
+  const response=await fetch(url);
+
+  if(response.status===429||response.status===418){
+   if(attempt<4){
+    await sleep(3000*(attempt+1));
+    return fetchJSON(url,attempt+1);
+   }
+   throw Error("Binance rate limit reached");
+  }
+
+  if(!response.ok){
+   if(response.status>=500&&attempt<2){
+    await sleep(1500*(attempt+1));
+    return fetchJSON(url,attempt+1);
+   }
+   throw Error("HTTP "+response.status);
+  }
+
+  return await response.json();
+
+ }catch(error){
+  if(attempt<2&&error.name==="TypeError"){
+   await sleep(1000*(attempt+1));
+   return fetchJSON(url,attempt+1);
+  }
+  throw error;
+ }
 }
 
 function ema(values,period){
@@ -188,8 +173,7 @@ function ema(values,period){
 }
 
 function calculateRSI(values,period=14){
- let gains=0;
- let losses=0;
+ let gains=0,losses=0;
 
  for(let i=1;i<=period;i++){
   const change=values[i]-values[i-1];
@@ -202,13 +186,11 @@ function calculateRSI(values,period=14){
 
  for(let i=period+1;i<values.length;i++){
   const change=values[i]-values[i-1];
-
   avgGain=(avgGain*(period-1)+Math.max(change,0))/period;
   avgLoss=(avgLoss*(period-1)+Math.max(-change,0))/period;
  }
 
  if(avgLoss===0)return 100;
-
  return 100-(100/(1+avgGain/avgLoss));
 }
 
@@ -228,7 +210,6 @@ function calculateATR(candles,period=14){
  }
 
  const recent=ranges.slice(-period);
-
  if(!recent.length)return 0;
 
  return recent.reduce((a,b)=>a+b,0)/recent.length;
@@ -237,9 +218,8 @@ function calculateATR(candles,period=14){
 function analyzeIndicators(values){
  if(values.length<60)throw Error("Insufficient candles");
 
- const ema20=ema(values,20);
- const ema50=ema(values,50);
-
+ const e20=ema(values,20);
+ const e50=ema(values,50);
  const fast=ema(values,12);
  const slow=ema(values,26);
 
@@ -247,34 +227,21 @@ function analyzeIndicators(values){
  const signalLine=ema(macdLine,9);
 
  const last=values.length-1;
-
  const price=values[last];
- const e20=ema20[last];
- const e50=ema50[last];
  const rsi=calculateRSI(values);
 
- const macd=macdLine[last];
- const macdSignal=signalLine[last];
-
- const emaDirection=e20>e50?"LONG":"SHORT";
- const macdDirection=macd>macdSignal?"LONG":"SHORT";
+ const emaDirection=e20[last]>e50[last]?"LONG":"SHORT";
+ const macdDirection=macdLine[last]>signalLine[last]?"LONG":"SHORT";
 
  let rsiDirection="NONE";
-
  if(rsi>50&&rsi<70)rsiDirection="LONG";
  if(rsi<50&&rsi>30)rsiDirection="SHORT";
 
- const votes=[
-  emaDirection,
-  macdDirection,
-  rsiDirection
- ];
-
- let longVotes=votes.filter(x=>x==="LONG").length;
- let shortVotes=votes.filter(x=>x==="SHORT").length;
+ const votes=[emaDirection,macdDirection,rsiDirection];
+ const longVotes=votes.filter(x=>x==="LONG").length;
+ const shortVotes=votes.filter(x=>x==="SHORT").length;
 
  let direction="NONE";
-
  if(longVotes>shortVotes)direction="LONG";
  if(shortVotes>longVotes)direction="SHORT";
 
@@ -284,10 +251,7 @@ function analyzeIndicators(values){
   direction!=="NONE";
 
  return {
-  price,
-  rsi,
-  ema20:e20,
-  ema50:e50,
+  price,rsi,
   emaDirection,
   macdDirection,
   rsiDirection,
@@ -298,16 +262,6 @@ function analyzeIndicators(values){
  };
 }
 
-async function fetchJSON(url){
- const response=await fetch(url);
-
- if(!response.ok){
-  throw Error("Binance API error: "+response.status);
- }
-
- return response.json();
-}
-
 async function getCandles(symbol,timeframe){
  const url=API+"/fapi/v1/klines?symbol="+
   encodeURIComponent(symbol)+
@@ -315,10 +269,7 @@ async function getCandles(symbol,timeframe){
 
  const candles=await fetchJSON(url);
 
- /*
-  Ignore the currently forming candle.
-  Use only completed candles for analysis.
- */
+ // Ignore the currently forming candle.
  const closed=candles.slice(0,-1);
 
  if(closed.length<60)throw Error("Insufficient candle history");
@@ -330,9 +281,7 @@ function createTradePlan(data){
  const entry=data.price;
  const stopDistance=data.atr*1.5;
 
- if(!entry||!stopDistance||!Number.isFinite(stopDistance)){
-  return null;
- }
+ if(!entry||!stopDistance||!Number.isFinite(stopDistance))return null;
 
  const stop=data.direction==="LONG"
   ?entry-stopDistance
@@ -343,26 +292,18 @@ function createTradePlan(data){
   :entry-stopDistance*2;
 
  const quantityByRisk=SETTINGS.risk/stopDistance;
- const quantityByLeverage=
-  (SETTINGS.capital*SETTINGS.leverage)/entry;
-
+ const quantityByLeverage=(SETTINGS.capital*SETTINGS.leverage)/entry;
  const quantity=Math.min(quantityByRisk,quantityByLeverage);
 
  const notional=quantity*entry;
  const estimatedRisk=quantity*stopDistance;
- const estimatedMargin=notional/SETTINGS.leverage;
 
  return {
-  entry,
-  stop,
-  target,
-  stopDistance,
-  quantity,
-  notional,
+  entry,stop,target,
+  quantity,notional,
   estimatedRisk,
-  estimatedMargin,
-  riskPercent:stopDistance/entry*100,
-  rewardRisk:2
+  estimatedMargin:notional/SETTINGS.leverage,
+  riskPercent:stopDistance/entry*100
  };
 }
 
@@ -385,7 +326,6 @@ async function analyzeCoin(ticker){
   (c.direction==="LONG"?3:c.direction==="SHORT"?-3:0);
 
  let direction="NONE";
-
  if(weighted>0)direction="LONG";
  if(weighted<0)direction="SHORT";
 
@@ -401,17 +341,11 @@ async function analyzeCoin(ticker){
   (c.direction===direction?3:0);
 
  const score=Math.abs(weighted);
-
  const atr=calculateATR(c5);
 
  const result={
-  symbol,
-  direction,
-  confirmed,
-  score,
-  agreement,
-  a,b,c,
-  atr,
+  symbol,direction,confirmed,score,agreement,
+  a,b,c,atr,
   volume:Number(ticker.quoteVolume),
   price:a.price
  };
@@ -427,18 +361,28 @@ async function analyzeCoin(ticker){
  return result;
 }
 
-async function runPool(items,worker,limit){
- const results=[];
+async function runPool(items,worker,limit,onProgress){
+ const results=new Array(items.length);
  let next=0;
+ let completed=0;
+ let failedCount=0;
 
  async function runner(){
-  while(next<items.length){
+  while(true){
    const index=next++;
+   if(index>=items.length)return;
 
    try{
     results[index]=await worker(items[index]);
    }catch(error){
     results[index]=null;
+    failedCount++;
+   }
+
+   completed++;
+
+   if(onProgress){
+    onProgress(completed,items.length,failedCount);
    }
   }
  }
@@ -447,7 +391,11 @@ async function runPool(items,worker,limit){
   Array.from({length:limit},()=>runner())
  );
 
- return results.filter(Boolean);
+ return {
+  results:results.filter(Boolean),
+  completed,
+  failedCount
+ };
 }
 
 function signalClass(direction){
@@ -457,44 +405,33 @@ function signalClass(direction){
 
 function renderPlan(x,potential=false){
  const p=x.plan;
-
  if(!p)return "";
-
- const label=potential?"POTENTIAL ":"";
 
  return `
  <div class="result ${x.direction==="LONG"?"long":"short"}">
-  <h3>${x.symbol} — ${label}${x.direction}</h3>
-
-  <p>
-   <b>Entry reference:</b> ${fmt(p.entry)}<br>
-   <b>Stop Loss:</b> ${fmt(p.stop)}<br>
-   <b>Take Profit:</b> ${fmt(p.target)}<br>
-   <b>Risk / Reward:</b> 1 : 2
-  </p>
-
-  <p>
-   <b>Estimated quantity:</b> ${fmt(p.quantity)} ${x.symbol.replace("USDT","")}<br>
-   <b>Position value:</b> ${fmt(p.notional)} USDT<br>
-   <b>Estimated margin at 3x:</b> ${fmt(p.estimatedMargin)} USDT<br>
-   <b>Estimated price risk:</b> ${fmt(p.estimatedRisk)} USDT<br>
-   <b>Stop distance:</b> ${p.riskPercent.toFixed(3)}%
-  </p>
-
-  <p class="small">
-   RSI: ${x.a.rsi.toFixed(1)} (5m) |
-   ${x.b.rsi.toFixed(1)} (15m) |
-   ${x.c.rsi.toFixed(1)} (1h)
-  </p>
-
-  ${potential?
-   '<p class="wait"><b>NOT CONFIRMED — Wait for further confirmation.</b></p>':
-   '<p class="good"><b>Indicator confirmation achieved. Verify before trading.</b></p>'
-  }
-
-  <p class="small">
-   Position estimates exclude trading fees, funding, slippage and exchange minimums.
-  </p>
+ <h3>${x.symbol} — ${potential?"POTENTIAL ":""}${x.direction}</h3>
+ <p>
+ <b>Entry reference:</b> ${fmt(p.entry)}<br>
+ <b>Stop Loss:</b> ${fmt(p.stop)}<br>
+ <b>Take Profit:</b> ${fmt(p.target)}<br>
+ <b>Risk / Reward:</b> 1 : 2
+ </p>
+ <p>
+ <b>Estimated quantity:</b> ${fmt(p.quantity)} ${x.symbol.replace("USDT","")}<br>
+ <b>Position value:</b> ${fmt(p.notional)} USDT<br>
+ <b>Estimated margin at 3x:</b> ${fmt(p.estimatedMargin)} USDT<br>
+ <b>Estimated price risk:</b> ${fmt(p.estimatedRisk)} USDT<br>
+ <b>Stop distance:</b> ${p.riskPercent.toFixed(3)}%
+ </p>
+ <p class="small">
+ RSI — 5m: ${x.a.rsi.toFixed(1)} |
+ 15m: ${x.b.rsi.toFixed(1)} |
+ 1h: ${x.c.rsi.toFixed(1)}
+ </p>
+ ${potential?
+ '<p class="wait"><b>NOT CONFIRMED — Wait for further confirmation.</b></p>':
+ '<p class="good"><b>Indicator confirmation achieved. Verify before trading.</b></p>'}
+ <p class="small">Estimates exclude fees, funding, slippage and exchange minimums. Check exchange filters before any order.</p>
  </div>`;
 }
 
@@ -502,23 +439,20 @@ function renderConfirmed(items){
  if(!items.length){
   $("confirmed").innerHTML=
    '<tr><td colspan="6" class="wait">NO CONFIRMED TRADE SETUPS</td></tr>';
-
   $("confirmedDetails").innerHTML=
    '<p class="wait">No fully aligned setup found.</p>';
-
   return;
  }
 
  $("confirmed").innerHTML=items.map(x=>`
-  <tr>
-   <td>${x.symbol}</td>
-   <td class="${signalClass(x.direction)}">${x.direction}</td>
-   <td>${x.a.direction}</td>
-   <td>${x.b.direction}</td>
-   <td>${x.c.direction}</td>
-   <td>${x.score}/6</td>
-  </tr>
- `).join("");
+ <tr>
+ <td>${x.symbol}</td>
+ <td class="${signalClass(x.direction)}">${x.direction}</td>
+ <td>${x.a.direction}</td>
+ <td>${x.b.direction}</td>
+ <td>${x.c.direction}</td>
+ <td>${x.score}/6</td>
+ </tr>`).join("");
 
  $("confirmedDetails").innerHTML=
   items.map(x=>renderPlan(x,false)).join("");
@@ -527,28 +461,36 @@ function renderConfirmed(items){
 function renderBackup(items){
  if(!items.length){
   $("backup").innerHTML=
-   '<tr><td colspan="7" class="wait">No suitable backup candidates found.</td></tr>';
-
+   '<tr><td colspan="7" class="wait">No suitable directional candidates found.</td></tr>';
   $("backupDetails").innerHTML=
-   '<p class="wait">Market conditions do not provide enough directional agreement. NO TRADE.</p>';
-
+   '<p class="wait">Insufficient directional agreement. NO TRADE.</p>';
   return;
  }
 
  $("backup").innerHTML=items.map((x,i)=>`
-  <tr>
-   <td>${i+1}</td>
-   <td>${x.symbol}</td>
-   <td class="${signalClass(x.direction)}">${x.direction}</td>
-   <td>${x.score}/6</td>
-   <td>${x.a.direction}</td>
-   <td>${x.b.direction}</td>
-   <td>${x.c.direction}</td>
-  </tr>
- `).join("");
+ <tr>
+ <td>${i+1}</td>
+ <td>${x.symbol}</td>
+ <td class="${signalClass(x.direction)}">${x.direction}</td>
+ <td>${x.score}/6</td>
+ <td>${x.a.direction}</td>
+ <td>${x.b.direction}</td>
+ <td>${x.c.direction}</td>
+ </tr>`).join("");
 
  $("backupDetails").innerHTML=
   items.map(x=>renderPlan(x,true)).join("");
+}
+
+function updateProgress(done,total,failed){
+ const percent=total?Math.round(done/total*100):0;
+ $("analyzed").innerText=done;
+ $("failed").innerText=failed;
+ $("progressText").innerText=percent+"%";
+ $("progressBar").style.width=percent+"%";
+ $("scanStatus").innerText=
+  "Analyzing all eligible markets: "+done+" / "+total+
+  " | Failed: "+failed;
 }
 
 async function scanMarket(){
@@ -557,11 +499,21 @@ async function scanMarket(){
  busy=true;
  $("scanButton").disabled=true;
 
+ if(nextTimer){
+  clearTimeout(nextTimer);
+  nextTimer=null;
+ }
+
+ $("progressBar").style.width="0%";
+ $("progressText").innerText="0%";
+ $("analyzed").innerText="0";
+ $("failed").innerText="0";
+
  try{
   $("connection").innerHTML=
    '<span class="wait">Connecting to Binance Futures...</span>';
 
-  $("scanStatus").innerText="Loading market data...";
+  $("scanStatus").innerText="Loading all eligible contracts...";
 
   const [info,tickers]=await Promise.all([
    fetchJSON(API+"/fapi/v1/exchangeInfo"),
@@ -587,36 +539,38 @@ async function scanMarket(){
     Number(b.quoteVolume)-Number(a.quoteVolume)
    );
 
+  $("totalCoins").innerText=market.length;
+
   $("prices").innerHTML=market.slice(0,10).map(t=>`
    <tr>
-    <td>${t.symbol}</td>
-    <td>${fmt(Number(t.lastPrice))}</td>
-    <td class="${Number(t.priceChangePercent)>=0?"good":"bad"}">
-     ${Number(t.priceChangePercent).toFixed(2)}%
-    </td>
-    <td>${fmt(Number(t.quoteVolume))}</td>
-   </tr>
-  `).join("");
+   <td>${t.symbol}</td>
+   <td>${fmt(Number(t.lastPrice))}</td>
+   <td class="${Number(t.priceChangePercent)>=0?"good":"bad"}">
+   ${Number(t.priceChangePercent).toFixed(2)}%
+   </td>
+   <td>${fmt(Number(t.quoteVolume))}</td>
+   </tr>`).join("");
 
   $("connection").innerHTML=
    '<span class="good">● CONNECTED — LIVE DATA</span>';
 
-  const selected=market.slice(0,SETTINGS.scanCount);
-
-  $("scanStatus").innerText=
-   "Analyzing "+selected.length+" high-volume USDT perpetual pairs...";
-
   $("confirmed").innerHTML=
-   '<tr><td colspan="6">Scanning...</td></tr>';
+   '<tr><td colspan="6">Scanning all markets...</td></tr>';
 
   $("backup").innerHTML=
-   '<tr><td colspan="7">Scanning...</td></tr>';
+   '<tr><td colspan="7">Scanning all markets...</td></tr>';
 
-  const results=await runPool(
-   selected,
+  $("confirmedDetails").innerHTML="";
+  $("backupDetails").innerHTML="";
+
+  const scan=await runPool(
+   market,
    analyzeCoin,
-   SETTINGS.concurrency
+   SETTINGS.concurrency,
+   updateProgress
   );
+
+  const results=scan.results;
 
   const confirmed=results
    .filter(x=>x.confirmed&&x.plan)
@@ -627,20 +581,21 @@ async function scanMarket(){
     !x.confirmed&&
     x.direction!=="NONE"&&
     x.plan&&
-    x.score>=3
+    x.score>=3&&
+    x.agreement>=3
    )
    .sort((a,b)=>
     a.plan.riskPercent-b.plan.riskPercent||
+    b.agreement-a.agreement||
     b.score-a.score
    )
    .slice(0,5);
 
   renderConfirmed(confirmed);
 
-  if(confirmed.length>0){
+  if(confirmed.length){
    $("backup").innerHTML=
-    '<tr><td colspan="7">Confirmed setups available. Backup list is shown only when there are no confirmed setups.</td></tr>';
-
+    '<tr><td colspan="7">Confirmed setups found. Backup list is not displayed.</td></tr>';
    $("backupDetails").innerHTML="";
   }else{
    renderBackup(backup);
@@ -650,43 +605,46 @@ async function scanMarket(){
    Capital: ${SETTINGS.capital} USDT<br>
    Risk budget per trade: ${SETTINGS.risk} USDT<br>
    Maximum leverage: ${SETTINGS.leverage}x<br>
-   Eligible USDT perpetual pairs: ${eligible.size}<br>
-   Pairs analyzed: ${results.length}<br>
+   Eligible USDT perpetual contracts: ${market.length}<br>
+   Successfully analyzed: ${results.length}<br>
+   Failed: ${scan.failedCount}<br>
    Confirmed setups: ${confirmed.length}<br>
    Backup candidates: ${confirmed.length?0:backup.length}<br>
-   Scan time: ${new Date().toLocaleString()}
+   Scan completed: ${new Date().toLocaleString()}
   `;
 
   $("scanStatus").innerText=
-   "Scan complete | Market pairs: "+eligible.size+
+   "Scan complete | Eligible: "+market.length+
    " | Analyzed: "+results.length+
+   " | Failed: "+scan.failedCount+
    " | Confirmed: "+confirmed.length+
    " | Backup: "+(confirmed.length?0:backup.length);
+
+  if(scan.failedCount>0){
+   $("scanStatus").innerHTML+=
+    ' <span class="wait">Some markets could not be analyzed. Results are partial.</span>';
+  }
 
  }catch(error){
   $("connection").innerHTML=
    '<span class="bad">CONNECTION / SCAN ERROR</span>';
-
   $("scanStatus").innerText=error.message;
 
   $("confirmed").innerHTML=
    '<tr><td colspan="6">Unable to complete scan.</td></tr>';
-
   $("backup").innerHTML=
    '<tr><td colspan="7">Unable to complete scan.</td></tr>';
 
  }finally{
   busy=false;
   $("scanButton").disabled=false;
+
+  // Start the next scan after the previous scan has finished.
+  nextTimer=setTimeout(scanMarket,SETTINGS.refreshMs);
  }
 }
 
 scanMarket();
-
-setInterval(
- scanMarket,
- SETTINGS.refreshMs
-);
 </script>
 
 </body>
